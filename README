@@ -1,0 +1,48 @@
+Apple Push Notification Server.
+------------------------------
+
+These script allows to manage push notifications for one or more apps.
+
+The service registers the device and associates it to an app. Once a device is
+associated to an app you can send them push notifications via a web form.
+If the user has un-installed the app, you can get notified by using the
+Apple Feedback service script.
+
+INSTALL:
+
+* Create a new mySQL DB. Run the "resources/APNS.sql" file to create the DB tables. 
+* Copy your ck.pem certificates to the certificates folder. 'ck' means the certificate and key are on the same file.
+* Add an app entry to the mySQL 'Apps' table.
+* Setup 'config.php'
+
+USAGE:
+
+Registering new devices:
+
+Your iPhone apps can register new devices by calling a URL in this form:
+http://YOURDOMAIN.COM/registerDevice.php?appId=YOURAPPId&deviceToken=YOURDEVICETOKEN
+
+Adding messages to the queue:
+To send a message use the following:
+http://YOURDOMAIN.COM/form.php
+
+Send pending messages from the message queue:
+http://YOURDOMAIN.COM/processMessageQueue.php
+
+Process feedback:
+http://YOURDOMAIN.COM/processFeedback.php
+
+
+SCHEDULING:
+
+Ideally the processMesageQueue.php script should run from a cron or scheduled task.
+After running processMesageQueue.php you should run processFeedback.php to get 
+notified of devices that no longer have the appId installed.
+
+
+SECURITY:
+
+Please store this scripts in a secure folder so they are not access
+by non authorized users.
+
+I hope you enjoy these scripts!
