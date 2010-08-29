@@ -247,7 +247,7 @@ class DataService
         //get the current UTC/GMT time
         $timestamp = gmdate('Y-m-d H:i:s', time());
 
-        if ($sth->rowCount() > 0) {
+        if ($sth->rowCount() == 0) {
             $sql = "INSERT INTO AppDevices (AppId, DeviceID, DeviceActive, DateAdded, DateUpdated) Values ($appId, $deviceId, $active, '$timestamp', '$timestamp')";
 
         }else{
