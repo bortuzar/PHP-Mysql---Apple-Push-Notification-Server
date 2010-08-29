@@ -65,8 +65,8 @@ class Apns
 
 		$this->stream = stream_socket_client($this->server, $err, $errstr, 60, STREAM_CLIENT_CONNECT, $ctx);
 		if (!$this->stream) {
-			print "<br/>Failed to connect $err $errstrn";
-			return;
+			//print "<br/>Failed to connect $err $errstrn";
+			throw new Exception("<br/>Failed to connect $err $errstrn");
 		}
 		else {
 			print "<br/>Opening connection to: {$this->server}";
