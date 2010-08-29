@@ -22,7 +22,7 @@
 ## $Id: config.php 168 2010-08-28 01:24:04Z Benjamin Ortuzar Seconde $
 ##
 
-//set_time_limit(100);
+//set_time_limit(10);
 
 //SQL Connection Parameters
 define('DBHOST', 'localhost');
@@ -33,11 +33,8 @@ define('DBPASSWORD', '');
 //Certificate folder
 $certificateFolder = 'certificates';
 
-//Push Server 
-$apnsPushServer = "ssl://gateway.sandbox.push.apple.com:2195";
-
-//Feedback Server
-$apnsFeedbackServer = "ssl://feedback.sandbox.push.apple.com:2196";
+//Push and Feedback servers
+//These urls are stored in mySQL in the CertificateTypes table.
 
 //Date settings. Apple uses UTC dates for Feedback info
 date_default_timezone_set('UTC');

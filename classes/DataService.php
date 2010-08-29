@@ -72,7 +72,7 @@ class DataService
      */
     public function getApps() {
 
-        $sql = "SELECT AppId, AppName, KeyCertFilePath, Passphrase FROM Apps";
+        $sql = "SELECT AppId, AppName FROM Apps";
 
         $sth = $this->dbh->prepare($sql);
         $sth->execute();
@@ -81,6 +81,62 @@ class DataService
 
         return $appsArray;
     }
+    
+    /**
+     * Gets an array of certificates of type
+     * 
+     * @return <array>
+     */
+    public function getCertificates() {
+
+        $sql = "SELECT CertificateId, CertificateName, C.CertificateTypeId, KeyCertFile, Passphrase, AppId FROM Certificates C";
+
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+
+        $certificatesArray = $sth->fetchAll(PDO::FETCH_OBJ);
+
+        return $certificatesArray;
+    }
+    
+    /**
+     * Gets a certificate
+     * 
+     * @param <int> $certificateId
+     * @return <object>
+     */
+    public function getCertificate($certificateId) {
+
+        $sql = "SELECT CertificateId, CertificateName, C.CertificateTypeId, KeyCertFile, Passphrase, AppId FROM Certificates C WHERE CertificateId = %d LIMIT 1";
+	 	$sql = sprintf($sql, (int)$certificateId);
+
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+
+        $certificate = $sth->fetch(PDO::FETCH_OBJ);
+
+        return $certificate;
+    }
+    
+     /**
+     * Gets a certificate
+     * 
+     * @param <int> $certificateId
+     * @return <object>
+     */
+    public function getCertificateServer($certificateId, $serverTypeId) {
+
+        $sql = "SELECT ServerUrl FROM CertificateServer CS LEFT JOIN Servers S ON CS.ServerId = S.ServerId WHERE CertificateId = %d AND ServerTypeId = %d LIMIT 1";
+	 	$sql = sprintf($sql, (int)$certificateId, (int)$serverTypeId);
+
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+
+        $server = $sth->fetch(PDO::FETCH_OBJ);
+
+        return $server;
+    }
+
 
     /**
      * Validates is a token pattern is valid
@@ -227,15 +283,15 @@ class DataService
     /**
      * Gets a list of messages
      * 
-     * @param <int> $appId
+     * @param <int> $certificateId
      * @param <int> $statusId
      * @param <int> $limit
      * @return <array>
      */
-    public function getMessages($appId, $statusId, $limit) {
+    public function getMessages($certificateId, $statusId, $limit) {
 
-        $sql = "SELECT DeviceToken, MessageId, Message, Badge, Sound FROM MessageQueue MQ, Devices D WHERE D.DeviceId = MQ.DeviceId AND AppId = %d  AND MQ.Status = %d LIMIT %d";
-        $sql = sprintf($sql, (int) $appId, (int)$statusId, (int)$limit);
+        $sql = "SELECT DeviceToken, MessageId, Message, Badge, Sound FROM MessageQueue MQ, Devices D WHERE D.DeviceId = MQ.DeviceId AND CertificateId = %d  AND MQ.Status = %d LIMIT %d";
+        $sql = sprintf($sql, (int) $certificateId, (int)$statusId, (int)$limit);
 
         $sth = $this->dbh->prepare($sql);
         $sth->execute();
@@ -264,18 +320,18 @@ class DataService
     /**
      * Adds a message to the Queue
      * 
-     * @param <int> $appId
+     * @param <int> $certificateId
      * @param <int> $deviceId
      * @param <string> $message
      * @param <int> $badge
      * @param <string> $sound
      */
-    public function addMessage($appId, $deviceId, $message, $badge = NULL, $sound = NULL){
+    public function addMessage($certificateId, $deviceId, $message, $badge = NULL, $sound = NULL){
 
         $timestamp = gmdate('Y-m-d H:i:s', time());
         
-        $sql = "INSERT INTO MessageQueue (AppId, DeviceId, Message, Badge, Sound, DateAdded) VALUES (%d, %d, %s, %d, %s, %s)";
-        $sql = sprintf($sql, (int)$appId, (int)$deviceId, $this->dbh->quote($message), (int)$badge, $this->dbh->quote($sound), $this->dbh->quote($timestamp));
+        $sql = "INSERT INTO MessageQueue (CertificateId, DeviceId, Message, Badge, Sound, DateAdded) VALUES (%d, %d, %s, %d, %s, %s)";
+        $sql = sprintf($sql, (int)$certificateId, (int)$deviceId, $this->dbh->quote($message), (int)$badge, $this->dbh->quote($sound), $this->dbh->quote($timestamp));
 
         //echo '<br/>'. $sql;
         $sth = $this->dbh->prepare($sql);

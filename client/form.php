@@ -29,9 +29,13 @@ if ($_POST['submit']) {
 
     echo "<br/>Started submitting messages to the queue";
 
-    //Get the devices associated to the app that are enabled
-    $devicesArray = DataService::singleton()->GetDevices($_POST['appId'], 1);
+	$certificate = DataService::singleton()->GetCertificate($_POST['certificateId']);
+	
+	//Get the devices associated to the app that are enabled
+    $devicesArray = DataService::singleton()->GetDevices($certificate->AppId, 1);
 
+	echo "<br/>Found ". count($devicesArray) ." Devices";
+	
     //create a new message on the queue for each of them
     foreach ($devicesArray as $device) {
     
@@ -41,7 +45,7 @@ if ($_POST['submit']) {
     	}
 		
 		echo "<br/>Message submitted to queue for DeviceId: [{$device->DeviceId}] DeviceNotes: [{$device->DeviceNotes}]";
-        DataService::singleton()->addMessage($_POST['appId'], $device->DeviceId, $_POST['message']);
+        DataService::singleton()->addMessage($_POST['certificateId'], $device->DeviceId, $_POST['message']);
     }
 
      echo "<br/>Completed submitting messages to the queue";
@@ -66,17 +70,19 @@ if ($_POST['submit']) {
     <body>
         <h1>Submit push message to devices</h1>
         <form method="POST" action="" onsubmit="javascript:return confirmSubmit()">
+        	Message:
             <textarea cols="20" rows="4" name="message"></textarea>
 
             <br/><br/>
-            <select name="appId">
+            Certificate: 
+            <select name="certificateId">
             <?php
             //get all apps
-            $appsArray = DataService::singleton()->getApps();
+            $certificatesArray = DataService::singleton()->getCertificates();
 
-            foreach ($appsArray as $app) {
+            foreach ($certificatesArray as $certificate) {
 
-                echo "<option value='{$app->AppId}'>{$app->AppName}</option>";
+                echo "<option value='{$certificate->CertificateId}'>{$certificate->CertificateName}</option>";
             }
             ?>
             </select>
@@ -85,7 +91,7 @@ if ($_POST['submit']) {
             
             <input type="checkbox" name="onlyTestDevices" value="1" checked> Only Test Devices
              <br/><br/>
-            <input type="submit" name="submit">
+            <input type="submit" name="submit" value="Submit to queue">
         </form>
     </body>
 </html>

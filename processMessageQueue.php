@@ -31,14 +31,16 @@ require_once('classes/Apns.php');
 
 echo "<br/>Started processing message queue";
 
-//get the apps
-$apps = DataService::singleton()->getApps();
+//get the certificates
+$certificates = DataService::singleton()->getCertificates();
 
 
-foreach ($apps as $app) {
+foreach ($certificates as $certificate) {
 
     //get N new messages from queue. We can get more messages on the next schedule
-    $messagesArray = DataService::singleton()->getMessages($app->AppId, MessageStatus::UNPROCESSED, 1000);
+    echo "<br/>Getting messages for: [{$certificate->CertificateName}]";
+    //var_dump($certificate);
+    $messagesArray = DataService::singleton()->getMessages($certificate->CertificateId, MessageStatus::UNPROCESSED, 1000);
 
     //if no messages for app continue with next
     if (count($messagesArray) == 0) {
@@ -46,8 +48,12 @@ foreach ($apps as $app) {
     }
 
     //connect to apple push notification server with the app credentials
-    $certificatePath = $certificateFolder . '/' . $app->KeyCertFilePath;
-    $apns = new apns($apnsPushServer, $certificatePath, $app->Passphrase);
+    $certificatePath = $certificateFolder . '/' . $certificate->KeyCertFile;
+    echo $certificatePath;
+    
+    $server = DataService::singleton()->getCertificateServer($certificate->CertificateId, 1);
+    //var_dump($server);
+    $apns = new apns($server->ServerUrl, $certificatePath, $certificate->Passphrase);
 
     //send each message
     foreach ($messagesArray as $message) {

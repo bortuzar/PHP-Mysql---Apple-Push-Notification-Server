@@ -28,21 +28,23 @@ require_once('classes/Apns.php');
 
 echo "<br/>Started processing Feedback";
 
-$apps = DataService::singleton()->getApps();
+//get the certificates
+$certificates = DataService::singleton()->getCertificates();
 
-//$dateStarted = date("Y/m/d H:i:s");
-foreach ($apps as $app) {
+foreach ($certificates as $certificate) {
 
 	//only process apps that have a certificate associated to it.
-	if($app->KeyCertFilePath == ''){
+	if($certificate->KeyCertFile == ''){
 	
-		echo "<br/>Certfile not set for App: [{$app->AppName}]";
+		echo "<br/>Certfile not set for App: [{$certificate->CertificateName}]";
 		continue;
 	}
-
+	//var_dump($certificate);
     //connect to feedback server
-    $certificatePath = $certificateFolder . '/' . $app->KeyCertFilePath;
-    $apns = new apns($apnsFeedbackServer, $certificatePath, $app->Passphrase);
+    $certificatePath = $certificateFolder . '/' . $certificate->KeyCertFile;
+    
+    $server = DataService::singleton()->getCertificateServer($certificate->CertificateId, 2);
+    $apns = new apns($server->ServerUrl, $certificatePath, $certificate->Passphrase);
 
     //get tokens
     $feedbackTokens = $apns->getFeedbackTokens();

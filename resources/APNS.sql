@@ -27,7 +27,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 28, 2010 at 10:43 AM
+-- Generation Time: Aug 29, 2010 at 05:48 AM
 -- Server version: 5.0.91
 -- PHP Version: 5.2.9
 
@@ -60,7 +60,6 @@ CREATE TABLE IF NOT EXISTS `AppDevices` (
   KEY `DeviceEnabled` (`DeviceActive`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
--- --------------------------------------------------------
 
 --
 -- Table structure for table `Apps`
@@ -69,10 +68,83 @@ CREATE TABLE IF NOT EXISTS `AppDevices` (
 CREATE TABLE IF NOT EXISTS `Apps` (
   `AppId` int(32) NOT NULL auto_increment,
   `AppName` varchar(255) collate utf8_unicode_ci NOT NULL,
-  `KeyCertFilePath` varchar(100) collate utf8_unicode_ci NOT NULL,
-  `Passphrase` varchar(100) collate utf8_unicode_ci NOT NULL,
-  PRIMARY KEY  (`AppId`)
+  `DateAdded` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`AppId`),
+  KEY `DateAdded` (`DateAdded`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `Apps`
+--
+
+INSERT INTO `Apps` (`AppId`, `AppName`, `DateAdded`) VALUES
+(1, 'Sample App', '0000-00-00 00:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Certificates`
+--
+
+CREATE TABLE IF NOT EXISTS `Certificates` (
+  `CertificateId` int(11) NOT NULL auto_increment,
+  `CertificateName` varchar(200) collate utf8_unicode_ci NOT NULL,
+  `AppId` int(11) NOT NULL,
+  `KeyCertFile` varchar(100) collate utf8_unicode_ci NOT NULL,
+  `Passphrase` varchar(100) collate utf8_unicode_ci NOT NULL,
+  `CertificateTypeId` int(11) NOT NULL,
+  PRIMARY KEY  (`CertificateId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `Certificates`
+--
+
+INSERT INTO `Certificates` (`CertificateId`, `CertificateName`, `AppId`, `KeyCertFile`, `Passphrase`, `CertificateTypeId`) VALUES
+(1, 'Sample App - Development', 1, 'sample_ck_dev.pem', 'samplePassKey', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `CertificateServer`
+--
+
+CREATE TABLE IF NOT EXISTS `CertificateServer` (
+  `CertificateServerId` int(11) NOT NULL auto_increment,
+  `CertificateId` int(11) NOT NULL,
+  `ServerId` int(11) NOT NULL,
+  PRIMARY KEY  (`CertificateServerId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `CertificateServer`
+--
+
+INSERT INTO `CertificateServer` (`CertificateServerId`, `CertificateId`, `ServerId`) VALUES
+(1, 1, 1),
+(2, 1, 3);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `CertificateTypes`
+--
+
+CREATE TABLE IF NOT EXISTS `CertificateTypes` (
+  `CertificateTypeId` int(11) NOT NULL auto_increment,
+  `CertificateTypeName` varchar(100) collate utf8_unicode_ci NOT NULL,
+  PRIMARY KEY  (`CertificateTypeId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `CertificateTypes`
+--
+
+INSERT INTO `CertificateTypes` (`CertificateTypeId`, `CertificateTypeName`) VALUES
+(1, 'Development Push SSL Certificate'),
+(2, 'Production Push SSL Certificate'),
+(3, 'Development Feedback SSL Certificate'),
+(4, 'Production Feedback SSL Certificate');
 
 -- --------------------------------------------------------
 
@@ -91,7 +163,6 @@ CREATE TABLE IF NOT EXISTS `Devices` (
   KEY `DeviceToken_test` (`DeviceToken`,`IsTestDevice`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
--- --------------------------------------------------------
 
 --
 -- Table structure for table `MessageQueue`
@@ -99,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `Devices` (
 
 CREATE TABLE IF NOT EXISTS `MessageQueue` (
   `MessageId` int(32) NOT NULL auto_increment,
-  `AppId` int(32) NOT NULL,
+  `CertificateId` int(32) NOT NULL,
   `DeviceId` int(32) NOT NULL,
   `Message` varchar(250) collate utf8_unicode_ci NOT NULL,
   `Badge` int(11) NOT NULL default '0',
@@ -108,3 +179,26 @@ CREATE TABLE IF NOT EXISTS `MessageQueue` (
   `Status` smallint(6) NOT NULL default '0',
   PRIMARY KEY  (`MessageId`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+--
+-- Table structure for table `Servers`
+--
+
+CREATE TABLE IF NOT EXISTS `Servers` (
+  `ServerId` int(11) NOT NULL auto_increment,
+  `Server Name` varchar(100) collate utf8_unicode_ci NOT NULL,
+  `ServerUrl` varchar(300) collate utf8_unicode_ci NOT NULL,
+  `ServerTypeId` int(11) NOT NULL,
+  PRIMARY KEY  (`ServerId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `Servers`
+--
+
+INSERT INTO `Servers` (`ServerId`, `Server Name`, `ServerUrl`, `ServerTypeId`) VALUES
+(1, 'Development Push Notitification Server', 'ssl://gateway.sandbox.push.apple.com:2195', 1),
+(2, 'Production - Push Notification Server', 'ssl://gateway.push.apple.com:2195', 1),
+(3, 'Development - Feedback Server', 'ssl://feedback.sandbox.push.apple.com:2196', 2),
+(4, 'Production - Feedback Server', 'ssl://feedback.push.apple.com:2196', 2);
