@@ -24,24 +24,23 @@
 
 require_once('config.php');
 require_once('classes/DataService.php');
-require_once('classes/Device.php');
 
-if (!isset($_POST['deviceToken']) || $_POST['deviceToken'] == '') {
+if (!isset($_REQUEST['deviceToken']) || $_REQUEST['deviceToken'] == '') {
 
-    echo $_POST['deviceToken'];
+    echo $_REQUEST['deviceToken'];
     exit("No deviceToken set");
 }
 
-if (!isset($_POST['appId']) || $_POST['appId'] == '') {
-    echo $_POST['appId'];
+if (!isset($_REQUEST['appId']) || $_REQUEST['appId'] == '') {
+    echo $_REQUEST['appId'];
     exit('Not appId set');
 }
 
 
-echo "Registering Device (if it does not exist already)";
-DataService::singleton()->RegisterDevice($_POST['deviceToken']);
+echo "<br/>Registering Device (if it does not exist already)";
+DataService::singleton()->RegisterDevice($_REQUEST['deviceToken']);
 
-echo "Enabling Device for App: [{$_POST['appId']}] (if not enabled already)";
-DataService::singleton()->setDeviceActive($_POST['deviceToken'], $_POST['appId'], 1)
+echo "<br/>Enabling Device for App: [{$_REQUEST['appId']}] (if not enabled already)";
+DataService::singleton()->setDeviceActive($_REQUEST['deviceToken'], $_REQUEST['appId'], 1)
 
 ?>
