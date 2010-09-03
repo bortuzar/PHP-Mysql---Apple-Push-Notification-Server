@@ -41,6 +41,12 @@ echo "<br/>Registering Device (if it does not exist already)";
 DataService::singleton()->RegisterDevice($_REQUEST['deviceToken']);
 
 echo "<br/>Enabling Device for App: [{$_REQUEST['appId']}] (if not enabled already)";
-DataService::singleton()->setDeviceActive($_REQUEST['deviceToken'], $_REQUEST['appId'], 1)
+DataService::singleton()->setDeviceActive($_REQUEST['deviceToken'], $_REQUEST['appId'], 1);
 
+//optional
+if(isset($_REQUEST['appSubscriptionId']))
+{
+	echo "<br/>Registering for Subscription". $_REQUEST['appSubscriptionId'];
+	DataService::singleton()->updateAppSubscription($_REQUEST['deviceToken'], $_REQUEST['appSubscriptionId'], 1);
+}
 ?>

@@ -55,11 +55,38 @@ CREATE TABLE IF NOT EXISTS `AppDevices` (
   `DeviceActive` tinyint(1) NOT NULL default '1',
   `DateAdded` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `DateUpdated` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `LaunchCount` int(11) NOT NULL,
   KEY `AppId` (`AppId`),
   KEY `DeviceId` (`DeviceId`),
   KEY `DeviceEnabled` (`DeviceActive`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `AppDeviceSubscriptions`
+--
+
+CREATE TABLE IF NOT EXISTS `AppDeviceSubscriptions` (
+  `AppDeviceSubscriptionId` int(11) NOT NULL auto_increment,
+  `DeviceId` int(11) NOT NULL,
+  `AppSubscriptionId` int(11) NOT NULL,
+  `DateAdded` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `DateUpdated` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `SubscriptionEnabled` tinyint(1) NOT NULL,
+  PRIMARY KEY  (`AppDeviceSubscriptionId`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `AppDeviceSubscriptions`
+--
+
+INSERT INTO `AppDeviceSubscriptions` VALUES
+(1, 8, 1, '2010-08-30 15:06:47', '2010-09-03 18:36:26', 1);
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `Apps`
@@ -79,6 +106,26 @@ CREATE TABLE IF NOT EXISTS `Apps` (
 
 INSERT INTO `Apps` (`AppId`, `AppName`, `DateAdded`) VALUES
 (1, 'Sample App', '0000-00-00 00:00:00');
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `AppSubscriptions`
+--
+
+CREATE TABLE IF NOT EXISTS `AppSubscriptions` (
+  `AppSubscriptionId` int(11) NOT NULL auto_increment,
+  `AppId` int(11) NOT NULL,
+  `SubscriptionName` text collate utf8_unicode_ci NOT NULL,
+  PRIMARY KEY  (`AppSubscriptionId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `AppSubscriptions`
+--
+
+
 
 -- --------------------------------------------------------
 
@@ -120,9 +167,9 @@ CREATE TABLE IF NOT EXISTS `CertificateServer` (
 -- Dumping data for table `CertificateServer`
 --
 
-INSERT INTO `CertificateServer` (`CertificateServerId`, `CertificateId`, `ServerId`) VALUES
-(1, 1, 1),
-(2, 1, 3);
+INSERT INTO `CertificateServer` VALUES
+(1, 1, 1);
+
 
 -- --------------------------------------------------------
 
@@ -140,7 +187,7 @@ CREATE TABLE IF NOT EXISTS `CertificateTypes` (
 -- Dumping data for table `CertificateTypes`
 --
 
-INSERT INTO `CertificateTypes` (`CertificateTypeId`, `CertificateTypeName`) VALUES
+INSERT INTO `CertificateTypes` VALUES
 (1, 'Development Push SSL Certificate'),
 (2, 'Production Push SSL Certificate'),
 (3, 'Development Feedback SSL Certificate'),
@@ -164,6 +211,9 @@ CREATE TABLE IF NOT EXISTS `Devices` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
+
+-- --------------------------------------------------------
+
 --
 -- Table structure for table `MessageQueue`
 --
@@ -181,6 +231,8 @@ CREATE TABLE IF NOT EXISTS `MessageQueue` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
+-- --------------------------------------------------------
+
 --
 -- Table structure for table `Servers`
 --
@@ -197,7 +249,7 @@ CREATE TABLE IF NOT EXISTS `Servers` (
 -- Dumping data for table `Servers`
 --
 
-INSERT INTO `Servers` (`ServerId`, `Server Name`, `ServerUrl`, `ServerTypeId`) VALUES
+INSERT INTO `Servers` VALUES
 (1, 'Development Push Notitification Server', 'ssl://gateway.sandbox.push.apple.com:2195', 1),
 (2, 'Production - Push Notification Server', 'ssl://gateway.push.apple.com:2195', 1),
 (3, 'Development - Feedback Server', 'ssl://feedback.sandbox.push.apple.com:2196', 2),

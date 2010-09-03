@@ -42,7 +42,7 @@ class DataService
 
             $this->dbh = new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUser, $dbPass);
 
-            echo "<br/>Connected to database";
+            //echo "<br/>Connected to database";
         } catch (PDOException $e) {
             echo $e->getMessage();
             die();
@@ -168,6 +168,54 @@ class DataService
 
         return $devicesArray;
     }
+    
+    
+     /**
+     * Gets an array of certificates of type
+     * 
+     * @return <array>
+     */
+    public function getAppSubscriptions($appId) {
+
+        $sql = "SELECT AppSubscriptionId, SubscriptionName FROM AppSubscriptions WHERE AppId = %d";
+		$sql = sprintf($sql, (int)$appId);
+		 
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+
+        $subscriptionsArray = $sth->fetchAll(PDO::FETCH_OBJ);
+
+        return $subscriptionsArray;
+    }
+    
+     /**
+     * Gets an array of devices subscribed to a feature
+     * 
+     * @param <int> $appId
+     * @param <int> $appFeatureId
+     * @return <array>
+     */
+    public function getDevicesSubscribed($appSubscriptionId) {
+        
+        $sql = "SELECT D.DeviceId, D.DeviceNotes, IsTestDevice
+				FROM AppDeviceSubscriptions ADS
+				LEFT JOIN AppSubscriptions AppS ON ADS.AppSubscriptionId = AppS.AppSubscriptionId
+				LEFT JOIN Devices D ON D.DeviceId = ADS.DeviceId
+				LEFT JOIN AppDevices AD ON AD.DeviceID = ADS.DeviceID
+				AND AD.AppId = AppS.AppId
+				WHERE AppS.AppSubscriptionId = %d
+				AND DeviceActive = 1
+				AND ADS.SubscriptionEnabled =1";
+				
+        $sql = sprintf($sql, (int)$appSubscriptionId);
+
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+
+        $devicesArray = $sth->fetchAll(PDO::FETCH_OBJ);
+
+        return $devicesArray;
+    }
 
     /**
      * Checks if a device has been  registered
@@ -229,7 +277,7 @@ class DataService
      * @param <int> $deviceToekn
      * @param <int> $appId
      * @param <int> $active
-     * @return <bool>
+     * @return <void>
      */
     public function setDeviceActive($deviceToken, $appId, $active) {
 
@@ -251,16 +299,54 @@ class DataService
             $sql = "INSERT INTO AppDevices (AppId, DeviceID, DeviceActive, DateAdded, DateUpdated) Values ($appId, $deviceId, $active, '$timestamp', '$timestamp')";
 
         }else{
-             $sql = "UPDATE AppDevices AD SET DeviceActive = $active, AD.DateUpdated = '{$timestamp}' WHERE AD.DeviceId = $deviceId  AND AD.AppId = $appId";
+             $sql = "UPDATE AppDevices AD SET DeviceActive = $active, AD.DateUpdated = '{$timestamp}', LaunchCount = LaunchCount +1 WHERE AD.DeviceId = $deviceId  AND AD.AppId = $appId";
            
         }
 
         $sth = $this->dbh->prepare($sql);
         $sth->execute();
 
-        return true;
+    }
+    
+    
+     /**
+     * Updates a subscription for a device
+     *
+     * @param <int> $deviceToekn
+     * @param <int> $appSubscriptionId
+     * @param <int> $enable
+     * @return <void>
+     */
+    public function updateAppSubscription($deviceToken, $appSubscriptionId, $enable) {
+
+        $deviceId = $this->isDeviceRegistered($deviceToken);
+        if($deviceId == 0){
+            return false;
+        }
+
+        $sql = "SELECT DeviceId FROM AppDeviceSubscriptions ADS WHERE ADS.DeviceId = %d AND ADS.AppSubscriptionId = %d LIMIT 1";
+        $sql = sprintf($sql, (int) $deviceId, (int) $appSubscriptionId);
+
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+
+        //get the current UTC/GMT time
+        $timestamp = gmdate('Y-m-d H:i:s', time());
+
+        if ($sth->rowCount() == 0) {
+            $sql = "INSERT INTO AppDeviceSubscriptions (DeviceID, AppSubscriptionId, DateAdded, DateUpdated, SubscriptionEnabled) Values ($deviceId, $appSubscriptionId, '$timestamp', '$timestamp', $enable)";
+
+        }else{
+
+             $sql = "UPDATE AppDeviceSubscriptions SET SubscriptionEnabled = $enable, DateUpdated = '{$timestamp}' WHERE DeviceId = $deviceId  AND AppSubscriptionId = $appSubscriptionId";
+           
+        }
+echo $sql;
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
 
     }
+
 
     /**
      * Sets a device Inactive.
