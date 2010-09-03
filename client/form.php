@@ -53,6 +53,7 @@ if ($_POST['submit']) {
 ?>
 <html>
     <head>
+    	<link rel="stylesheet" href="css/style.css?v=1">
         <script type="text/javascript">
             <!--
             function confirmSubmit() {
@@ -68,13 +69,13 @@ if ($_POST['submit']) {
         </script>
     </head>
     <body>
-        <h1>Submit push message to devices</h1>
+        
         <form method="POST" action="" onsubmit="javascript:return confirmSubmit()">
-        	Message:
-            <textarea cols="20" rows="4" name="message"></textarea>
+        	<label for="message">Message:</label><br/>
+            <textarea cols="20" rows="4" name="message" id="message"></textarea>
 
-            <br/><br/>
-            Certificate: 
+            <br/>
+            <label for="certificateId">Certificate:</label><br/>
             <select name="certificateId">
             <?php
             //get all apps
@@ -89,9 +90,9 @@ if ($_POST['submit']) {
 
             <br/><br/>
             
-            <input type="checkbox" name="onlyTestDevices" value="1" checked> Only Test Devices
-             <br/><br/>
-            <input type="submit" name="submit" value="Submit to queue">
+            <label for="onlyTestDevices">Test Devices Only: </label><input type="checkbox" name="onlyTestDevices" id="onlyTestDevices" value="1" checked>
+            <br/><br/>
+            <input type="submit" name="submit" value="Submit to message queue">
         </form>
     </body>
 </html>
