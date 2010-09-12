@@ -49,4 +49,11 @@ if(isset($_REQUEST['appSubscriptionId']))
 	echo "<br/>Registering for Subscription". $_REQUEST['appSubscriptionId'];
 	DataService::singleton()->updateAppSubscription($_REQUEST['deviceToken'], $_REQUEST['appSubscriptionId'], 1);
 }
+
+if(isset($_REQUEST['feedUrl'])){
+	echo "\n<br/>Register Feed: {$_REQUEST['feedUrl']} ";
+	$feedId = DataService::singleton()->registerFeed($_REQUEST['feedUrl']);
+	echo "\n<br/>FeedId: {$feedId}";
+	DataService::singleton()->subscribeDeviceToFeed($_REQUEST['deviceToken'], $_REQUEST['appId'], $feedId, $_REQUEST['feedEnable']);
+}
 ?>

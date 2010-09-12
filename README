@@ -8,6 +8,7 @@ FEATURES:
 * Multiple App management.
 * Multiple Certificate Management (Developmnet/Production).
 * Simple web form to submit push notifications.
+* Monitor RSS feeds.
 * Single connection per certificate to the APNS servers.
 * Message Queue.
 * Apple Feedback processing to remove devices that should not subscribed any more. 
@@ -52,6 +53,14 @@ BASIC USAGE:
 	http://YOURDOMAIN.COM/processFeedback.php
 
 
+ADVANCED USAGE:
+
+At the moment don't provide documentation for setting up RSS feeds and creating multiple subscriptions with an app. But should be easy to setup by just looking at the project code.
+
+* Feeds are registered via the registerDevice.php script by passing the 'feedUrl' and 'feedEnable' parameters.
+* processFeeds.php should run as a cron job or schedule task.
+* Multiple subscriptions within an app are registered by passing the 'appSubscriptionId' parameter.
+
 SCHEDULING:
 
 Ideally the processMesageQueue.php script should run from a cron job or scheduled task.
@@ -64,4 +73,4 @@ SECURITY:
 Please store these scripts in a secure folder so they are not access
 by non authorised users.
 
-I hope you enjoy these scripts!
+I hope you enjoy these scripts! Please fork :)

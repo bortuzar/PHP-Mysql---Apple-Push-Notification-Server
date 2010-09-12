@@ -341,7 +341,7 @@ class DataService
              $sql = "UPDATE AppDeviceSubscriptions SET SubscriptionEnabled = $enable, DateUpdated = '{$timestamp}' WHERE DeviceId = $deviceId  AND AppSubscriptionId = $appSubscriptionId";
            
         }
-echo $sql;
+		//echo $sql;
         $sth = $this->dbh->prepare($sql);
         $sth->execute();
 
@@ -424,6 +424,204 @@ echo $sql;
         $sth->execute();
   
         
+    }
+    
+     /**
+     * Checks if feed exists.
+     *
+     * @param <string> $feedUrl
+     * @return <int>
+     */
+    public function isFeedRegistered($feedUrl){
+    
+    	$sql = "SELECT FeedId FROM Feeds WHERE FeedUrl = %s LIMIT 1";
+        $sql = sprintf($sql, $this->dbh->quote($feedUrl));
+
+		echo $sql;
+		
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+
+        $feedId = 0;
+        if ($sth->rowCount() > 0) {
+            $feed = $sth->fetch(PDO::FETCH_OBJ);
+            $feedId = $feed->FeedId;
+        }
+
+        return $feedId;
+
+    
+    }
+    
+     /**
+     * Registers a feed if it does not exist.
+     *
+     * @param <string> $feedUrl
+     * @return <int>
+     */
+    public function registerFeed($feedUrl) {
+
+
+        //check if device already exists
+        $feedId = $this->isFeedRegistered($feedUrl);
+        if($feedId > 0){
+            //feed already exists
+            return $feedId;
+        }
+        //get the current UTC/GMT time
+        $timestamp = gmdate('Y-m-d H:i:s', time());
+
+        $sql = "INSERT INTO Feeds (FeedUrl, DateLastChecked) VALUES (%s, %s)";
+        $sql = sprintf($sql, $this->dbh->quote($feedUrl),  $this->dbh->quote($timestamp));
+
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+        
+        $lastInsertedId = $this->dbh->lastInsertId();
+
+        return $lastInsertedId;
+        
+    }
+    
+    
+     /**
+     * Subscribes a device to a feed
+     * 
+     * @param <int> $appDeviceId
+     * @param <int> $feedId
+     * @param <int> $enable
+     * @return <void>
+     */
+    public function subscribeDeviceToFeed($deviceToken, $appId, $feedId, $enable){
+    	
+        $deviceId = $this->isDeviceRegistered($deviceToken);
+        if($deviceId == 0){
+            return false;
+        }    	
+    	//find the appDeviceId
+    	$sql = "SELECT AppDeviceId FROM AppDevices AD WHERE AD.DeviceId = %d AND AD.AppId = %d LIMIT 1";
+        $sql = sprintf($sql, (int) $deviceId, (int) $appId);
+
+		echo $sql;
+
+        $sth = $this->dbh->prepare($sql); 
+        $sth->execute();       
+        $appDevice = $sth->fetch(PDO::FETCH_OBJ);
+		var_dump($appDevice);
+		
+		//check if its already subscribed.
+		$sql = "SELECT FeedDeviceId FROM FeedDevices WHERE FeedId = %d AND AppDeviceId = %d LIMIT 1";
+		$sql = sprintf($sql, $feedId, $appDevice->AppDeviceId);
+		
+		echo $sql;
+		
+		$sth = $this->dbh->prepare($sql);  
+		$sth->execute();   
+        //get the current UTC/GMT time
+        $timestamp = gmdate('Y-m-d H:i:s', time());
+
+        if ($sth->rowCount() == 0) {
+            $sql = "INSERT INTO FeedDevices (FeedId, AppDeviceId, DateAdded, DateUpdated, Enabled) Values (%d, %d, %s, %s, %d)";
+			$sql = sprintf($sql, $feedId, $appDevice->AppDeviceId,   $this->dbh->quote($timestamp),$this->dbh->quote($timestamp), $enable);
+
+        }else{
+
+             $sql = "UPDATE FeedDevices SET Enabled = %d, DateUpdated = %s WHERE AppDeviceId = %d  AND FeedId = %d";
+             $sql = sprintf($sql, $enable, $this->dbh->quote($timestamp), $appDevice->AppDeviceId, $feedId);
+           
+        }
+		echo $sql;
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+    }
+    
+    
+     /**
+     * Gets a list of feeds in random order
+     * 
+     * @return <array>
+     */
+    public function getFeeds() {
+
+        $sql = "SELECT FeedId, FeedName, FeedUrl, DateLastUpdated, DateLastChecked FROM Feeds ORDER BY RAND()";
+        
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+
+        $feedsArray = $sth->fetchAll(PDO::FETCH_OBJ);
+
+        return $feedsArray;
+    }
+    
+
+    
+    
+     /**
+     * Updates the DateLastChecked for a feed
+     * 
+     * @param <int> $feedId
+     * @return <void>
+     */
+    public function updateFeedDateLastChecked($feedId){
+    
+    	 //get the current UTC/GMT time
+        $timestamp = gmdate('Y-m-d H:i:s', time());
+    	$sql = "UPDATE Feeds SET DateLastChecked = %s WHERE FeedId = %d";
+    	$sql = sprintf($sql, $this->dbh->quote($timestamp),  $feedId);
+ 
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+    
+    }
+    
+    
+      /**
+     * Updates the DateLastChecked for a feed
+     * 
+     * @param <int> $feedId
+     * @return <void>
+     */
+    public function updateFeedDateLastUpdated($feedId, $dateTime){
+    
+    	$sql = "UPDATE Feeds SET DateLastUpdated = %s WHERE FeedId = %d";
+    	$sql = sprintf($sql, $this->dbh->quote($dateTime),  $feedId);
+ 		echo "<br/>". $sql;
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+    
+    }
+
+    
+    
+     /**
+     * Updates the DateLastChecked for a feed
+     * 
+     * @param <int> $feedId
+     * @return <array>
+     */
+    public function getFeedDevices($feedId){
+    
+    	$sql = "SELECT D.DeviceId, D.IsTestDevice, D.DeviceNotes, C.CertificateId
+				FROM  Feeds F
+				LEFT JOIN FeedDevices FD ON F.FeedId = FD.FeedId
+				LEFT JOIN AppDevices AD ON AD.AppDeviceId = FD.AppDeviceId
+				LEFT JOIN Devices D ON AD.DeviceId = D.DeviceId
+				LEFT JOIN Certificates C ON AD.AppId = C.AppId
+				WHERE FD.Enabled = 1
+				AND AD.DeviceActive =1
+				AND C.CertificateTypeId =1
+				AND F.FeedId = %d";
+				
+				
+		$sql = sprintf($sql, $feedId);
+ 		//echo $sql;
+        
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+
+        $devicesArray = $sth->fetchAll(PDO::FETCH_OBJ);
+
+        return $devicesArray;		
     }
 
 

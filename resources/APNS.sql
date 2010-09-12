@@ -27,7 +27,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 29, 2010 at 05:48 AM
+-- Generation Time: Sep 12, 2010 at 02:40 AM
 -- Server version: 5.0.91
 -- PHP Version: 5.2.9
 
@@ -50,12 +50,14 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 
 CREATE TABLE IF NOT EXISTS `AppDevices` (
+  `AppDeviceId` int(11) NOT NULL auto_increment,
   `AppId` int(32) NOT NULL,
   `DeviceId` int(32) NOT NULL,
   `DeviceActive` tinyint(1) NOT NULL default '1',
   `DateAdded` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `DateUpdated` timestamp NOT NULL default '0000-00-00 00:00:00',
   `LaunchCount` int(11) NOT NULL,
+  PRIMARY KEY  (`AppDeviceId`),
   KEY `AppId` (`AppId`),
   KEY `DeviceId` (`DeviceId`),
   KEY `DeviceEnabled` (`DeviceActive`)
@@ -187,7 +189,7 @@ CREATE TABLE IF NOT EXISTS `CertificateTypes` (
 -- Dumping data for table `CertificateTypes`
 --
 
-INSERT INTO `CertificateTypes` VALUES
+INSERT INTO `CertificateTypes` (`CertificateTypeId`, `CertificateTypeName`) VALUES
 (1, 'Development Push SSL Certificate'),
 (2, 'Production Push SSL Certificate'),
 (3, 'Development Feedback SSL Certificate'),
@@ -208,6 +210,39 @@ CREATE TABLE IF NOT EXISTS `Devices` (
   PRIMARY KEY  (`DeviceId`),
   KEY `DeviceToken` (`DeviceToken`),
   KEY `DeviceToken_test` (`DeviceToken`,`IsTestDevice`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `FeedDevices`
+--
+
+CREATE TABLE IF NOT EXISTS `FeedDevices` (
+  `FeedDeviceId` int(11) NOT NULL auto_increment,
+  `FeedId` int(11) NOT NULL,
+  `AppDeviceId` int(11) NOT NULL,
+  `DateAdded` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `DateUpdated` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `Enabled` tinyint(1) NOT NULL,
+  PRIMARY KEY  (`FeedDeviceId`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Feeds`
+--
+
+CREATE TABLE IF NOT EXISTS `Feeds` (
+  `FeedId` int(11) NOT NULL auto_increment,
+  `FeedName` varchar(50) collate utf8_unicode_ci NOT NULL,
+  `FeedUrl` varchar(500) collate utf8_unicode_ci NOT NULL,
+  `DateLastChecked` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `DateLastUpdated` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`FeedId`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
@@ -231,6 +266,7 @@ CREATE TABLE IF NOT EXISTS `MessageQueue` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
+
 -- --------------------------------------------------------
 
 --
@@ -249,7 +285,7 @@ CREATE TABLE IF NOT EXISTS `Servers` (
 -- Dumping data for table `Servers`
 --
 
-INSERT INTO `Servers` VALUES
+INSERT INTO `Servers` (`ServerId`, `Server Name`, `ServerUrl`, `ServerTypeId`) VALUES
 (1, 'Development Push Notitification Server', 'ssl://gateway.sandbox.push.apple.com:2195', 1),
 (2, 'Production - Push Notification Server', 'ssl://gateway.push.apple.com:2195', 1),
 (3, 'Development - Feedback Server', 'ssl://feedback.sandbox.push.apple.com:2196', 2),
