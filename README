@@ -6,11 +6,11 @@ These script allow you to manage push notifications for one or more apps.
 FEATURES:
 
 * Multiple App management.
-* Multiple Certificate Management (Developmnet/Production).
-* Simple web form to submit push notifications.
+* Multiple Certificate Management (Development/Production).
+* Sample web form to submit push notifications.
 * Monitor RSS feeds.
 * Single connection per certificate to the APNS servers.
-* Message Queue.
+* Message queue.
 * Apple Feedback processing to remove devices that should not subscribed any more. 
 * Send push notifications only to test devices.
 
@@ -25,12 +25,17 @@ It requires ports 2195 and 2196 to communicate with the APNS servers.
 
 INSTALL:
 
-* Create a new mySQL DB. Run the "resources/APNS.sql" file to create the DB tables. 
-* Copy your ck.pem certificates to the certificates folder. 'ck' means the certificate and key components are on the same file.
+* Create a new mySQL DB. 
+* Run the "resources/APNS.sql" file to create the DB tables. 
+* Customise the 'config.php' file.
+
+SETUP YOUR APP:
+
+* Copy your ck.pem certificates to the certificates folder. 'ck' means the certificate and key components are contained on the same file.
 * Add an app entry to the mySQL 'Apps' table.
 * Add a certificate to the mySQL 'Cerficates' table.
 * Add an entry to the 'CertificateServer' table.
-* Customise the 'config.php' file.
+
 
 BASIC USAGE:
 
@@ -42,7 +47,7 @@ BASIC USAGE:
 2) Submit messages to the queue:
 
 	To submit a message to the subscribed devices use the following:
-	http://YOURDOMAIN.COM/form.php
+	http://YOURDOMAIN.COM/subscriptionForm.php
 
 3) Send messages to the devices from the message queue:
 
